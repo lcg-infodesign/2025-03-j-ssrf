@@ -9,6 +9,10 @@ let annoSelezionato = 2025; // di default mostro all'inizio 2025
 const coloreBackgroundTop = "#d6fcffff";
 const coloreBackgroundBottom = "#fdf98aff";
 
+const coloreTitolo = 40;
+const coloreNavBar = ["#a8ca88cf"];
+const coloreBordoNavBar = "#000000c4";
+
 
 
 
@@ -17,8 +21,6 @@ function preload() {
 
   fontTitolo = loadFont('https://cdnjs.cloudflare.com/ajax/libs/topcoat/0.8.0/font/SourceCodePro-Bold.otf');
   fontTesto = loadFont('https://cdnjs.cloudflare.com/ajax/libs/topcoat/0.8.0/font/SourceCodePro-Regular.otf');
-
-  filtraDatiPerAnno(annoSelezionato);
 }
 
 
@@ -27,11 +29,17 @@ function setup() {
   createCanvas(windowWidth, altezzaTotale);
 
   textFont(fontTesto);
+
+  filtraDatiPerAnno(annoSelezionato);
 }
 
 
 function draw() {
   background(220);
+
+  disegnaGradiente();
+
+  disegnaNavBar();
 }
 
 function filtraDatiPerAnno(anno) {
@@ -59,6 +67,8 @@ function filtraDatiPerAnno(anno) {
       datiFiltratiPerAnno.push(paese);
     }
   }
+
+  raggruppaPaesiPerRegione();
 }
 
 function disegnaGradiente() {
@@ -68,5 +78,39 @@ function disegnaGradiente() {
       // mi da colore c che è risultato interpolazione tra 2 colori 
     stroke(c);
     line(0, y, width, y); // ogni pixel di altezza occupato da una riga della lunghezza schermo del colore c
+  }
+}
+
+function disegnaNavBar() {
+  push();
+  
+  fill(coloreNavBar);
+  stroke(coloreBordoNavBar);
+  strokeWeight(1.5);
+  let navHeight = 60;
+  let navMargin = 30;
+  rect(navMargin, 35, width - (navMargin * 2), navHeight, 100);
+  
+  textFont(fontTitolo);
+  fill(coloreTitolo);
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(40);
+  textStyle(BOLD);
+  text("FREEDOM IN THE WORLD", width/2, 60);
+  
+  pop();
+}
+
+function raggruppaPaesiPerRegione() {
+  paesiPerRegione = {}; // creo oggetto che organizza paesi in base a regione
+  
+  for (let paese of datiFiltratiPerAnno) {
+    // per ogni paese nell'array, o creo array vuoto per regione che non esiste
+    // e ci metto dentro quel paese, o metto paese nella regione rispettiva
+    if (!paesiPerRegione[paese.regione]) {
+      paesiPerRegione[paese.regione] = [];
+    }
+    paesiPerRegione[paese.regione].push(paese);
   }
 }
