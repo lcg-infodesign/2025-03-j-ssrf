@@ -36,6 +36,7 @@ const colori = {
 
 const coloreHighlight = ["#e6124790"];
 
+const colorePannelloLegenda = "#a8ca88cf";
 
 
 
@@ -67,7 +68,7 @@ function draw() {
   disegnaNavBar();
 
   // disegno "prato"
-  let yPrato = height - height/2.9;
+  let yPrato = height/1.65;
   fill(colorePrato);
   noStroke();
   rect(0, yPrato, width, height - yPrato);
@@ -140,6 +141,12 @@ function draw() {
     );
   }
 
+  // PANNELLO LEGENDA
+  disegnaPannelloLegenda(yPrato);
+
+  // TESTO SOTTO
+  disegnaSezioneTestuale(yPrato + 80);
+
 }
 
 function filtraDatiPerAnno(anno) {
@@ -187,9 +194,9 @@ function disegnaNavBar() {
   
   fill(coloreNavBar);
   stroke(coloreBordoNavBar);
-  strokeWeight(1.5);
-  let navHeight = 60;
-  let navMargin = 30;
+  strokeWeight(0);
+  let navHeight = 70;
+  let navMargin = 320;
   rect(navMargin, 35, width - (navMargin * 2), navHeight, 100);
   
   textFont(fontTitolo);
@@ -198,7 +205,7 @@ function disegnaNavBar() {
   textAlign(CENTER, CENTER);
   textSize(40);
   textStyle(BOLD);
-  text("FREEDOM IN THE WORLD", width/2, 60);
+  text("FREEDOM IN THE WORLD", width/2, 65);
   
   pop();
 }
@@ -453,7 +460,7 @@ function creareMenuAnno() {
   
   let navHeight = 70;
   let navTop = 90;
-  menuAnno.position(width / 2 - 50, navTop + (navHeight/2) );
+  menuAnno.position(width / 2 - 50, navTop + (navHeight/2.5) );
   
   menuAnno.option('2025');
   menuAnno.option('2024');
@@ -468,3 +475,140 @@ function cambiaAnno() {
   filtraDatiPerAnno(annoSelezionato);
 }
 
+function disegnaPannelloLegenda(yPrato) {
+  push();
+  
+  let pannelloX = width - 420;
+  let pannelloY = yPrato - 370;
+  let pannelloLarghezza = 380;
+  let pannelloAltezza = 340;
+  let raggioAngoli = 15;
+  
+  fill(colorePannelloLegenda);
+  noStroke();
+  rect(pannelloX, pannelloY, pannelloLarghezza, pannelloAltezza, raggioAngoli);
+  
+  let testoX = pannelloX + 25;
+  let testoY = pannelloY + 40;
+  
+  fill(coloreTitolo);
+  textAlign(LEFT, TOP);
+  textSize(18);
+  textFont(fontTitolo);
+  text("COME LEGGERE LA VISUALIZZAZIONE", testoX, testoY);
+  
+  testoY += 35;
+  textSize(11);
+  textFont(fontTesto);
+
+  let testoDescrizione = "Ogni soffione rappresenta una regione geopolitica.\nI pallini sono paesi/territori valutati secondo il\nFreedom in the World Index. Punta il cursore su \nuno di essi per visualizzarne i dettagli";
+  text(testoDescrizione, testoX, testoY);
+  
+  testoY += 80;
+  textFont(fontTitolo);
+  text("Dimensione dei pallini:", testoX, testoY);
+  
+  testoY += 15;
+  textFont(fontTesto);
+  text("Indica il punteggio totale di libertà (0-100)", testoX, testoY);
+  
+  testoY += 25;
+  fill(colori.F.base);
+  circle(testoX + 10, testoY, 8);
+  textSize(10);
+  fill(coloreTitolo);
+  text("Basso punteggio", testoX + 25, testoY - 5);
+  
+  fill(colori.F.base);
+  circle(testoX + 140, testoY, 20);
+  fill(coloreTitolo);
+  text("Alto punteggio", testoX + 160, testoY - 5);
+  
+  testoY += 35;
+  textSize(11);
+  textFont(fontTitolo);
+  fill(coloreTitolo);
+  text("Status di Libertà:", testoX, testoY);
+  
+  testoY += 20;
+  textFont(fontTesto);
+  fill(colori.F.base);
+  circle(testoX + 8, testoY, 12);
+  fill(coloreTitolo);
+  textSize(10);
+  text("Free (F)", testoX + 20, testoY - 5);
+  
+  fill(colori.PF.base);
+  circle(testoX + 100, testoY, 12);
+  fill(coloreTitolo);
+  text("Partly Free (PF)", testoX + 112, testoY - 5);
+  
+  fill(colori.NF.base);
+  circle(testoX + 230, testoY, 12);
+  fill(coloreTitolo);
+  text("Not Free (NF)", testoX + 242, testoY - 5);
+  
+  testoY += 30;
+  textSize(11);
+  textFont(fontTitolo);
+  fill(coloreTitolo);
+  text("Tipo:", testoX, testoY);
+  
+  testoY += 20;
+  textFont(fontTesto);
+  fill(220);
+  circle(testoX + 8, testoY, 12);
+  fill(coloreTitolo);
+  textSize(10);
+  text("Country (nazione)", testoX + 20, testoY - 5);
+  
+  noFill();
+  stroke(220);
+  strokeWeight(1.2);
+  circle(testoX + 160, testoY, 12);
+  strokeWeight(0.8);
+  circle(testoX + 160, testoY, 8);
+  strokeWeight(0.6);
+  circle(testoX + 160, testoY, 4);
+  noStroke();
+  fill(coloreTitolo);
+  text("Territory (territorio)", testoX + 172, testoY - 5);
+
+  pop();
+}
+
+function disegnaSezioneTestuale(yInizio) {
+  push();
+  
+  let margine = 80;
+  let larghezzaTotale = width - (margine * 2);
+  let larghezzaColonna = larghezzaTotale / 3;
+  
+  let col1X = margine;
+  textFont(fontTitolo);
+  fill(255);
+  textAlign(LEFT, TOP);
+  textSize(40);
+  textStyle(BOLD);
+  textLeading(40);
+  text("ABOUT THE\nDATASET", col1X, yInizio);
+  
+  let col2X = margine + larghezzaColonna;
+  textFont(fontTesto);
+  textSize(13);
+  textStyle(NORMAL);
+  textLeading(22);
+  fill(255, 255, 255, 230);
+  
+  let testo1 = "Freedom in the World è il rapporto annuale di Freedom House sulla libertà politica e i diritti civili nel mondo. Valuta lo stato della libertà in paesi e territori attraverso un'analisi dettagliata dei diritti politici e delle libertà civili.\n\nOgni paese riceve un punteggio da 0 a 100, basato su 25 indicatori che misurano la libertà di espressione, il diritto di voto, lo stato di diritto e altri aspetti che ritiene indicatori della libertà umana.";
+  
+  text(testo1, col2X, yInizio, larghezzaColonna - 40);
+  
+  let col3X = margine + (larghezzaColonna * 2);
+  
+  let testo2 = "I paesi sono classificati in tre categorie: Free (liberi), Partly Free (parzialmente liberi) e Not Free (non liberi). Questa metodologia può essere utilizzata anche come strumento per comprendere le tendenze globali della democrazia.";
+  
+  text(testo2, col3X, yInizio, larghezzaColonna - 40);
+  
+  pop();
+}
