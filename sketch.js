@@ -33,6 +33,8 @@ const colori = {
   NF: { base: "#6f0c2bb0", light: "#dfd4c5", dark: "#9a8872" }
 }
 
+const coloreHighlight = ["#e6124790"];
+
 
 
 function preload() {
@@ -50,6 +52,7 @@ function setup() {
   textFont(fontTesto);
 
   filtraDatiPerAnno(annoSelezionato);
+  console.log(posizioniPerRegione)
 }
 
 
@@ -65,6 +68,73 @@ function draw() {
   fill(colorePrato);
   noStroke();
   rect(0, yPrato, width, height - yPrato);
+
+  if (paesiPerRegione['Americas']) {
+    disegnaSoffione(
+      paesiPerRegione['Americas'], 
+      'Americas',
+      145, 550, 350, yPrato,
+      posizioniPerRegione['Americas'],
+      50, true, 0, 150
+    );
+  }
+  
+  if (paesiPerRegione['Europe']) {
+    disegnaSoffione(
+      paesiPerRegione['Europe'], 
+      'Europe',
+      180, 180, 
+      width/3.8, yPrato,
+      posizioniPerRegione['Europe'],
+      40, true, 0, 180
+    );
+  }
+  
+  if (paesiPerRegione['Africa']) {
+    disegnaSoffione(
+      paesiPerRegione['Africa'], 
+      'Africa',
+      width/2.6, 350, 
+      width/2.3, yPrato,
+      posizioniPerRegione['Africa'],
+      50, 
+      true, 0, 180
+    );
+  }
+  
+  if (paesiPerRegione['Middle East']) {
+    disegnaSoffione(
+      paesiPerRegione['Middle East'], 
+      'Middle East',
+      width/1.75, 430, 
+      width/2.5, yPrato,
+      posizioniPerRegione['Middle East'],
+      25, true, 20, -100
+    );
+  }
+  
+  if (paesiPerRegione['Eurasia']) {
+    disegnaSoffione(
+      paesiPerRegione['Eurasia'], 
+      'Eurasia',
+      width/1.45, 230, 
+      width /1.7, yPrato,
+      posizioniPerRegione['Eurasia'],
+      20, true, 60, 70
+    );
+  }
+  
+  if (paesiPerRegione['Asia']) {
+    disegnaSoffione(
+      paesiPerRegione['Asia'], 
+      'Asia',
+      width/1.15, 200, 
+      width/ 1.3, yPrato,
+      posizioniPerRegione['Asia'],
+      50, 
+      true, 30, 155
+    );
+  }
 
 }
 
@@ -95,6 +165,7 @@ function filtraDatiPerAnno(anno) {
   }
 
   raggruppaPaesiPerRegione();
+  precalcolaPosizioniRegioni(); 
 }
 
 function disegnaGradiente() {
@@ -294,9 +365,54 @@ function disegnaSoffione(
     let paese = paesi[i];
     let pos = posizioni[i];
     
-    stroke(colori[paese.status].light); // uso colore in base a suo status
+    stroke(colori[paese.status].light);
     strokeWeight(0.3);
     line(0, 0, pos.x, pos.y);
+  }
+  
+  // variabile x contenere paese su cui stiamo in hover
+  let paeseInHover = null;
+  
+  // finalmente disegno pallini aaaaaaaaaaaaaaaaa
+  // per ogni paese calcolo dimensione pallino in base a punteggio totale
+  for (let i = 0; i < paesi.length; i++) {
+    let paese = paesi[i];
+    let pos = posizioni[i];
+    
+    let dimensione = map(paese.total, 5, 100, 6, 25); 
+    // distribuisco total score del paese, che va da 5 a 100, tra 6 e 25
+    
+    // distingue countries da territories
+    if (paese.tipo === 'c') {
+      // se è countries cerchio pieno
+      fill(colori[paese.status].base);
+      noStroke();
+      circle(pos.x, pos.y, dimensione);
+    } else {
+      // altrimenti cerchi concentrici
+      noFill();
+      stroke(colori[paese.status].base);
+      strokeWeight(1.5);
+      circle(pos.x, pos.y, dimensione);
+      strokeWeight(1);
+      circle(pos.x, pos.y, dimensione * 0.65);
+      strokeWeight(0.8);
+      circle(pos.x, pos.y, dimensione * 0.35);
+    }
+    
+    // rilevamento hover
+    let distanzaMouse = dist(mouseX - centroX, mouseY - centroY, pos.x, pos.y);
+    // calcolo distanza mouse e pallino (sto lavorando in sistema coordinate traslato
+    // quindi devo sottrarre centro x e Y a mouse X e mouse Y che sono globali)
+
+    // se mouse è dentro il pallino (distanza < raggio), disegna anello rosso intorno e salva questo paese
+    if (distanzaMouse < dimensione/2) {
+      noFill();
+      stroke(coloreHighlight);
+      strokeWeight(2.5);
+      circle(pos.x, pos.y, dimensione + 6);
+      paeseInHover = paese;
+    }
   }
   
   // centro soffione
@@ -314,7 +430,14 @@ function disegnaSoffione(
     noStroke();
     textAlign(CENTER, CENTER);
     textSize(18);
+    textStyle(BOLD);
     text(nomeRegione, centroX + labelOffsetX, centroY + labelOffsetY);
     pop();
   }
+  
+  if (paeseInHover !== null) {
+    mostraInfoPaese(paeseInHover, mouseX, mouseY);
+  }
+  // se c'è un paese sotto il mouse, mostra il tooltip
+  
 }
