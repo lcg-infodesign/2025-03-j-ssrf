@@ -9,10 +9,29 @@ let annoSelezionato = 2025; // di default mostro all'inizio 2025
 const coloreBackgroundTop = "#d6fcffff";
 const coloreBackgroundBottom = "#fdf98aff";
 
+// navbar e prato
 const coloreTitolo = 40;
 const coloreNavBar = ["#a8ca88cf"];
 const coloreBordoNavBar = "#000000c4";
+const colorePrato = "#00341eff";
 
+
+let paesiPerRegione = {};
+let posizioniPerRegione = {};
+
+
+const coloreBackgroundTooltip = ["#efefefff"];
+const coloreBordoTooltip = 100;
+const coloreTestoTooltip = 40;
+
+
+const coloreStelo = ["#ce1e4a90"];
+const coloreCentroSoffione = ["#00341eff"];
+const colori = {
+  F: { base: "#2d6d6dbd", light: "#6ea5a5", dark: "#1a4444" },
+  PF: { base: "#8fa59cc1", light: "#b8cbc3", dark: "#6b7f76" },
+  NF: { base: "#6f0c2bb0", light: "#dfd4c5", dark: "#9a8872" }
+}
 
 
 
@@ -40,6 +59,13 @@ function draw() {
   disegnaGradiente();
 
   disegnaNavBar();
+
+  // disegno "prato"
+  let yPrato = height - height/2.9;
+  fill(colorePrato);
+  noStroke();
+  rect(0, yPrato, width, height - yPrato);
+
 }
 
 function filtraDatiPerAnno(anno) {
@@ -112,5 +138,183 @@ function raggruppaPaesiPerRegione() {
       paesiPerRegione[paese.regione] = [];
     }
     paesiPerRegione[paese.regione].push(paese);
+  }
+}
+
+
+// per disegnare soffione prima calcolo posizioni casuali per vari paesi
+// poi uso questa funzione per disegnare pallini per ogni stato in funzione per 
+// disegnare il soffione intero
+function calcolaPosizioniSoffione(paesi, dispersione = 1) {
+  let posizioni = [];
+  let raggioBase = 50 * dispersione;
+  let numeroLivelli = ceil(sqrt(paesi.length / 12)); 
+    // dispongo paesi in anelli, arrotondo per eccesso
+    // radice quadrata di numero paesi / 12, perchè capacità dei cerchi
+    // cresce quadraticamente, capacità dei livelli è uguale a circa
+    // numero di livelli^2, quindi livelli ≈ √capacità
+  let indicePaese = 0;
+  
+  for (let livello = 0; livello < numeroLivelli; livello++) {
+    let raggio = raggioBase + (livello * 40 * dispersione);
+    // calcolo raggi diversi in base a livello
+
+    // calcolo numero pallini per livello in modo da limitare sovrapposizioni
+    let paesiInQuestoLivello = min(
+      floor((TWO_PI * raggio) / (20 * dispersione)), 
+      // arrotondo per difetto: circonferenza / 20 (voglio che ogni pallino abbia 20 px a disposizione) 
+      // x dispersione (controlla quindi se hanno poi più o meno spazio disponibile 
+      // rispetto a default 20)
+      paesi.length - indicePaese
+      // il min() prende il valore più piccolo tra:
+        // quanti pallini ci stanno fisicamente nel cerchio
+        // quanti paesi  rimangono effettivamente da posizionare
+    );
+    
+    // trovo posizione per ogni pallino nell'anello corrente
+    for (let i = 0; i < paesiInQuestoLivello; i++) {
+      if (indicePaese >= paesi.length) break; // si interrompe se supero numero di paesi
+      
+      let angolo = map(i, 0, paesiInQuestoLivello, 0, TWO_PI); 
+      // distribuisco pllini di un livello su 360 gradi
+      let variazioneRaggio = random(-10 * dispersione, 30 * dispersione);
+      let variazioneAngolo = random(-0.08, 0.08);b
+      // x rendere più organico introduco variazione sia di angolo che di raggio
+      
+      // trasformo coordinate polari in cartesiane
+      let x = (raggio + variazioneRaggio) * cos(angolo + variazioneAngolo);
+      // cos(a) = cateto adiacente (x) / ipotenusa (r) 
+      // --> quindi cateto adiacente (x) / ipotenusa (r) x r = cateto adiacente che è x
+      let y = (raggio + variazioneRaggio) * sin(angolo + variazioneAngolo);
+       // sin(a) = cateto opposto (y) / ipotenusa (r) 
+        // --> quindi cateto opposto (y) / ipotenusa (r) x r = cateto opposto che è y
+
+      posizioni.push({x: x, y: y});
+      indicePaese++;
+    }
+  }
+  
+  return posizioni;
+}
+
+function precalcolaPosizioniRegioni() {
+  // ora preparo coordinate per per pallini di ciascuna regione, e definisco dispersione
+  posizioniPerRegione = {};
+  
+  for (let regione in paesiPerRegione) {
+    // per ogni nome di regione nell'oggetto paesiperregione
+    let paesi = paesiPerRegione[regione];
+    // prendi l'aray di paesi di questa regione e chiamalo "paesi"
+    let dispersione = map(paesi.length, 0, 50, 0.8, 1.2);
+    // calcolo dispersione tra 0.8 e 1.2 in base a quanti paesi ci sono in una regione
+    posizioniPerRegione[regione] = calcolaPosizioniSoffione(paesi, dispersione);
+    // calcolo posizioni dei pallini per questa regione e salvo nell'oggetto 
+    // posizioniPerRegione con il nome della regione come chiave
+  }
+}
+
+function mostraInfoPaese(paese, x, y) {
+  push();
+  
+  fill(coloreBackgroundTooltip);
+  stroke(coloreBordoTooltip);
+  strokeWeight(1);
+  
+  let larghezzaTooltip = 200;
+  let altezzaTooltip = 115;
+  
+  let tooltipX = x + 15;
+  let tooltipY = y + 15;
+  
+
+  // se tooltip esce dallo schermo spostalo
+  if (tooltipX + larghezzaTooltip > width - 10) {
+    tooltipX = x - larghezzaTooltip - 15;
+  }
+  if (tooltipY + altezzaTooltip > height - 10) {
+    tooltipY = y - altezzaTooltip - 15;
+  }
+  if (tooltipX < 10) tooltipX = 10;
+  if (tooltipY < 10) tooltipY = 10;
+  
+  rect(tooltipX, tooltipY, larghezzaTooltip, altezzaTooltip, 5);
+  
+  noStroke();
+  fill(coloreTestoTooltip);
+  textAlign(LEFT, TOP);
+  textSize(12);
+  textFont (fontTitolo)
+  text(paese.nome, tooltipX + 10, tooltipY + 10);
+  
+
+  textSize(10);
+  textFont (fontTesto)
+  let tipoTesto = paese.tipo === 'c' ? 'Country' : 'Territory';
+  text("Type: " + tipoTesto, tooltipX + 10, tooltipY + 45);
+  text("Status: " + paese.status, tooltipX + 10, tooltipY + 30);
+  text("Political Rights: " + paese.pr, tooltipX + 10, tooltipY + 60);
+  text("Civil Liberties: " + paese.cl, tooltipX + 10, tooltipY + 75);
+  text("Total Score: " + paese.total, tooltipX + 10, tooltipY + 90);
+  
+  pop();
+}
+
+function disegnaSoffione(
+  paesi,              // array paesi nella regione
+  nomeRegione,        // nome regione
+  centroX, centroY,   // coordinate del centro soffione
+  steloStartX, steloStartY,  // coordinate partenza dello stelo
+  posizioni,          // Array delle posizioni precalcolate
+  diametroCentro = 60,  // diametro del centro 
+  mostraNome = true,    // se mostrare il nome regione
+  labelOffsetX = 0,     // spostamento orizzontale dell'etichetta
+  labelOffsetY = 180    // spostamento verticale dell'etichetta
+) {
+  push();
+  
+  // STELO
+
+  noFill();
+  stroke(coloreStelo);
+  strokeWeight(3.5);
+  
+  bezier(
+    steloStartX, steloStartY,
+    steloStartX - 30, steloStartY - 80,
+    centroX + 50, centroY + 50,
+    centroX, centroY
+  );
+  
+  // SOFFIONE
+  // sposta l'origine del sistema di coordinate al centro del soffione
+  translate(centroX, centroY);
+  
+  // per ogni paese diesgno linea che collega suo pallino al centro
+  for (let i = 0; i < paesi.length; i++) {
+    let paese = paesi[i];
+    let pos = posizioni[i];
+    
+    stroke(colori[paese.status].light); // uso colore in base a suo status
+    strokeWeight(0.3);
+    line(0, 0, pos.x, pos.y);
+  }
+  
+  // centro soffione
+  fill(coloreCentroSoffione);
+  noStroke();
+  circle(0, 0, diametroCentro);
+  
+  pop();
+  
+  // disegno etichetta se la voglio
+  if (mostraNome) {
+    push();
+    textFont(fontTitolo);
+    fill(coloreTitolo);
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textSize(18);
+    text(nomeRegione, centroX + labelOffsetX, centroY + labelOffsetY);
+    pop();
   }
 }
