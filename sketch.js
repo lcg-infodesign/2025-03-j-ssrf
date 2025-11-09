@@ -70,7 +70,7 @@ function draw() {
   disegnaNavBar();
 
   // disegno "prato"
-  let yPrato = height/1.65;
+  let yPrato = 800;
   fill(colorePrato);
   noStroke();
   rect(0, yPrato, width, height - yPrato);
