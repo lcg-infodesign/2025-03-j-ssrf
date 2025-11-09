@@ -19,6 +19,7 @@ const colorePrato = "#00341eff";
 
 let paesiPerRegione = {};
 let posizioniPerRegione = {};
+let paeseInHoverGlobale;
 
 
 const coloreBackgroundTooltip = ["#efefefff"];
@@ -61,6 +62,7 @@ function setup() {
 
 
 function draw() {
+  paeseInHoverGlobale = null;
   background(220);
 
   disegnaGradiente();
@@ -146,6 +148,15 @@ function draw() {
 
   // TESTO SOTTO
   disegnaSezioneTestuale(yPrato + 80);
+
+  // V SCROLLA X VEDERE ALTRO
+  disegnaIndicatoreScroll(yPrato);
+
+  // DISEGNO TOOLTIP INFO
+  // nel draw pk voglio stia sopra a tutto
+  if (paeseInHoverGlobale !== null) {
+    mostraInfoPaese(paeseInHoverGlobale, mouseX, mouseY);
+  }
 
 }
 
@@ -447,9 +458,9 @@ function disegnaSoffione(
   }
   
   if (paeseInHover !== null) {
-    mostraInfoPaese(paeseInHover, mouseX, mouseY);
+    paeseInHoverGlobale = paeseInHover;
   }
-  // se c'è un paese sotto il mouse, mostra il tooltip
+  // salvo paese in hover in una variabile
   
 }
 
@@ -600,7 +611,7 @@ function disegnaSezioneTestuale(yInizio) {
   textLeading(22);
   fill(255, 255, 255, 230);
   
-  let testo1 = "Freedom in the World è il rapporto annuale di Freedom House sulla libertà politica e i diritti civili nel mondo. Valuta lo stato della libertà in paesi e territori attraverso un'analisi dettagliata dei diritti politici e delle libertà civili.\n\nOgni paese riceve un punteggio da 0 a 100, basato su 25 indicatori che misurano la libertà di espressione, il diritto di voto, lo stato di diritto e altri aspetti che ritiene indicatori della libertà umana.";
+  let testo1 = "Freedom in the World è il rapporto annuale di Freedom House sulla libertà politica e i diritti civili nel mondo. Valuta lo stato della libertà in paesi e territori attraverso un'analisi dettagliata dei diritti politici e delle libertà civili.\n\nOgni paese riceve un punteggio da 0 a 100, basato su 25 indicatori che misurano la libertà di espressione, il diritto di voto, lo stato di diritto e altri aspetti che l'organizzazione ritiene indicatori della libertà umana.";
   
   text(testo1, col2X, yInizio, larghezzaColonna - 40);
   
@@ -609,6 +620,42 @@ function disegnaSezioneTestuale(yInizio) {
   let testo2 = "I paesi sono classificati in tre categorie: Free (liberi), Partly Free (parzialmente liberi) e Not Free (non liberi). Questa metodologia può essere utilizzata anche come strumento per comprendere le tendenze globali della democrazia.";
   
   text(testo2, col3X, yInizio, larghezzaColonna - 40);
+  
+  pop();
+}
+
+function disegnaIndicatoreScroll(yPrato) {
+  push();
+  
+  let x = width / 2;
+  let y = yPrato - 40;
+  
+  // creo oscillazione verticale di 5px
+  let offset = sin(frameCount * 0.05) * 5;
+  y += offset;
+  
+  noFill();
+  stroke(coloreCentroSoffione);
+  
+  strokeWeight(1.3);
+  beginShape();
+  vertex(x - 15, y - 10);
+  vertex(x, y);
+  vertex(x + 15, y - 10);
+  endShape();
+  
+  beginShape();
+  vertex(x - 15, y + 5);
+  vertex(x, y + 15);
+  vertex(x + 15, y + 5);
+  endShape();
+  
+  noStroke();
+  fill(coloreCentroSoffione);
+  textFont(fontTesto);
+  textAlign(CENTER, CENTER);
+  textSize(11);
+  text("Scorri per saperne di più", x, y - 35);
   
   pop();
 }
