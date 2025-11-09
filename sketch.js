@@ -4,6 +4,7 @@ let fontTesto;
 
 let datiFiltratiPerAnno = []; // array per dati un solo anno
 let annoSelezionato = 2025; // di default mostro all'inizio 2025
+let menuAnno;
 
 // costanti sfondo gradiente
 const coloreBackgroundTop = "#d6fcffff";
@@ -37,6 +38,7 @@ const coloreHighlight = ["#e6124790"];
 
 
 
+
 function preload() {
   table = loadTable('FREEDOMHOUSE_ES3.csv', 'csv', 'header');
 
@@ -52,7 +54,8 @@ function setup() {
   textFont(fontTesto);
 
   filtraDatiPerAnno(annoSelezionato);
-  console.log(posizioniPerRegione)
+ 
+  creareMenuAnno()
 }
 
 
@@ -69,11 +72,12 @@ function draw() {
   noStroke();
   rect(0, yPrato, width, height - yPrato);
 
+  // DISEGNO TUTTI I SOFFIONI
   if (paesiPerRegione['Americas']) {
     disegnaSoffione(
       paesiPerRegione['Americas'], 
       'Americas',
-      145, 550, 350, yPrato,
+      145, 550, 300, yPrato,
       posizioniPerRegione['Americas'],
       50, true, 0, 150
     );
@@ -249,7 +253,7 @@ function calcolaPosizioniSoffione(paesi, dispersione = 1) {
       let angolo = map(i, 0, paesiInQuestoLivello, 0, TWO_PI); 
       // distribuisco pllini di un livello su 360 gradi
       let variazioneRaggio = random(-10 * dispersione, 30 * dispersione);
-      let variazioneAngolo = random(-0.08, 0.08);b
+      let variazioneAngolo = random(-0.08, 0.08); // "b" questa b mi ha fatto perdere 3 ore
       // x rendere più organico introduco variazione sia di angolo che di raggio
       
       // trasformo coordinate polari in cartesiane
@@ -441,3 +445,26 @@ function disegnaSoffione(
   // se c'è un paese sotto il mouse, mostra il tooltip
   
 }
+
+function creareMenuAnno() {
+
+  menuAnno = createSelect();
+  menuAnno.id('menuAnno'); // assegno id per poter stilizzare in css nell'index
+  
+  let navHeight = 70;
+  let navTop = 90;
+  menuAnno.position(width / 2 - 50, navTop + (navHeight/2) );
+  
+  menuAnno.option('2025');
+  menuAnno.option('2024');
+  menuAnno.option('2023');
+  menuAnno.selected(annoSelezionato.toString()); // di default seleziona anno corrente
+  menuAnno.changed(cambiaAnno);
+  // quando cambio la selezione chiama funzione cambiAnno
+}
+
+function cambiaAnno() {
+  annoSelezionato = parseInt(menuAnno.value());
+  filtraDatiPerAnno(annoSelezionato);
+}
+
